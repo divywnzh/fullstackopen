@@ -1,17 +1,38 @@
 import { useState } from 'react'
 
-const ShowStats=({type,value,feedbackSent}) => {
+const StatisticLine=({type,value})=>{
+  return(
+    <tr> 
+      <td>{type}</td>
+      <td>{value}</td>
+    </tr>
+  )
+}
 
-  if (feedbackSent){
+const Statistics=({good,neutral,bad}) => {
+
+  const total=(good + neutral +bad)
+  const average = (good*1 + neutral*0 +bad*(-1))/total
+  const positive = good*100/total
+
+  if (total === 0) {
     return (
-      <table>
-        <tr> 
-          <td>{type}</td>
-          <td>{value}</td>
-        </tr>
-      </table>
+      <p>No feedback given</p>
     )
   }
+  
+  return (
+    <table>
+      <tbody>
+        <StatisticLine type="good" value={good} />
+        <StatisticLine type="neutral" value={neutral} />
+        <StatisticLine type="bad" value={bad} />
+        <StatisticLine type="average" value={average} />
+        <StatisticLine type="positive" value={positive} />
+      </tbody>
+    </table>
+  )
+  
 
 }
 
@@ -29,7 +50,6 @@ const App = () => {
   const [good, setGood] = useState(0)
   const [neutral, setNeutral] = useState(0)
   const [bad, setBad] = useState(0)
-  const [feedbackSent, setFeedbackSent] = useState(0)
   
   const submit = ({type}) => {
     setFeedbackSent(1)
@@ -50,30 +70,17 @@ const App = () => {
 
   console.log("total", good+neutral+bad)
 
-  const total=(good + neutral +bad)
-  const average = (good*1 + neutral*0 +bad*(-1))/total
-  const positive = good*100/total
-
   return (
     <>
-      <h1>
-        give feedback
-      </h1>
+      <h1>give feedback</h1>
       
       <Button type={"g"} submit={submit} />
       <Button type={"n"} submit={submit} />
       <Button type={"b"} submit={submit} />
 
       <h1>statistics</h1>
-      {!feedbackSent ? (<p>No feedback given</p>):(
-      <>
-        <ShowStats type={"good"} value={good} feedbackSent={feedbackSent} />
-        <ShowStats type={"neutral"} value={neutral} feedbackSent={feedbackSent} />
-        <ShowStats type={"bad"} value={bad} feedbackSent={feedbackSent} />
-        <ShowStats type={"average"} value={average} feedbackSent={feedbackSent} />
-        <ShowStats type={"positive"} value={positive} feedbackSent={feedbackSent} />
-      </>
-      )}
+      <Statistics good={good} neutral={neutral} bad={bad} />
+    
     </>
   )
 }
