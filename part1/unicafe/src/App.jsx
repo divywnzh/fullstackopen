@@ -1,32 +1,27 @@
 import { useState } from 'react'
 
-const ShowStats=({good,neutral,bad,feedbackSent}) => {
-  
-  const total=(good + neutral +bad)
-  const average = (good*1 + neutral*0 +bad*(-1))/total
-  const positivie = good*100/total
+const ShowStats=({type,value,feedbackSent}) => {
 
   if (feedbackSent){
-    return(
-      <>
-        <h1>statistics</h1>
-      
-        <p> good {good} </p>
-        <p> neutral {neutral} </p>
-        <p> bad {bad} </p> 
-        <p> average {average} </p>
-        <p> positive {positivie} </p>
-      </>
+    return (
+      <table>
+        <tr> 
+          <td>{type}</td>
+          <td>{value}</td>
+        </tr>
+      </table>
     )
   }
-  
-  return(
-    <>
-    <h1>statistics</h1>
-    <p> No feedback given </p>
-    </>
+
+}
+
+const Button=({type,submit}) => {
+  const text = type === 'g' ? 'good' : type === 'n' ? 'neutral' : 'bad';
+  return (
+    <button onClick={() => submit({type})}>
+      {text}
+    </button>
   )
-  
 }
 
 const App = () => {
@@ -36,32 +31,49 @@ const App = () => {
   const [bad, setBad] = useState(0)
   const [feedbackSent, setFeedbackSent] = useState(0)
   
-  const submit = (type) => {
+  const submit = ({type}) => {
     setFeedbackSent(1)
     if (type === 'g') {
-      setGood(good + 1);
-      console.log("good",good)
+      const newGood=good+1
+      setGood(newGood);
+      console.log("good",newGood)
     } else if (type === 'n') {
-      setNeutral(neutral + 1);
-      console.log("neutral",neutral)
+      const newNeutral=neutral+1
+      setNeutral(newNeutral);
+      console.log("neutral",newNeutral)
     } else if (type === 'b') {
-      setBad(bad + 1);
-      console.log("bad",bad)
+      const newBad=bad+1
+      setBad(newBad);
+      console.log("bad",newBad)
     }
-   
   };
 
   console.log("total", good+neutral+bad)
+
+  const total=(good + neutral +bad)
+  const average = (good*1 + neutral*0 +bad*(-1))/total
+  const positive = good*100/total
 
   return (
     <>
       <h1>
         give feedback
       </h1>
-      <button onClick={()=>submit("g")}>{"good"}</button>
-      <button onClick={()=>submit("n")}>{"neutral"}</button>
-      <button onClick={()=>submit("b")}>{"bad"}</button>
-      <ShowStats good={good} neutral={neutral} bad={bad} feedbackSent={feedbackSent} />
+      
+      <Button type={"g"} submit={submit} />
+      <Button type={"n"} submit={submit} />
+      <Button type={"b"} submit={submit} />
+
+      <h1>statistics</h1>
+      {!feedbackSent ? (<p>No feedback given</p>):(
+      <>
+        <ShowStats type={"good"} value={good} feedbackSent={feedbackSent} />
+        <ShowStats type={"neutral"} value={neutral} feedbackSent={feedbackSent} />
+        <ShowStats type={"bad"} value={bad} feedbackSent={feedbackSent} />
+        <ShowStats type={"average"} value={average} feedbackSent={feedbackSent} />
+        <ShowStats type={"positive"} value={positive} feedbackSent={feedbackSent} />
+      </>
+      )}
     </>
   )
 }
