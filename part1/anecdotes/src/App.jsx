@@ -8,6 +8,16 @@ const Button=({handleNext,text}) => {
   )
 }
 
+const MostVoted=(votes)=>{
+  const [index, setIndex] = useState(0);
+  for(let i=0;i<votes.length;i++){
+    if(votes[i]>votes[index]){
+      setIndex(i)
+    }
+  }
+  return index
+}
+
 const App = () => {
 
   const anecdotes = [
@@ -37,12 +47,16 @@ const App = () => {
     setVotes(copy)
   }
 
+  const mostVoted=MostVoted(votes)
+
   return (
     <>
-      <h1>THE WISE TIMES</h1>
+      <h1>Anecdote of the day</h1>
       <p>{anecdotes[selected]} has {votes[selected]} votes</p>
       <Button handleNext={handleNext} text="Next anecdote"/>
       <Button handleNext={handleVote} text="Vote"/>
+      <h2>Anecdote with the most votes</h2>
+      <p>{anecdotes[mostVoted]} has {votes[mostVoted]} votes</p>
     </>
   )
 }
