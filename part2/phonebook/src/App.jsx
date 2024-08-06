@@ -19,11 +19,12 @@ const App = () => {
     console.log('effect')
     personService
     .getAll()
-      .then(initialPersons => {
-        console.log('promise fulfilled')
-        setPersons(initialPersons)
-      })
+    .then(initialPersons => {
+      console.log('Initiallized... promise fulfilled')
+      setPersons(initialPersons)
+    })
   }, [])
+
   console.log('render', persons.length, 'persons')
 
   const handleSearch=(event)=>{
@@ -36,16 +37,6 @@ const App = () => {
     setNewNumber(event.target.value)
   }
 
-  const DeleteContact = (id,name) => {
-    if (window.confirm(`Delete ${name} ?`))
-      personService
-        .remove(id)
-        .then(removedPerson => {
-          console.log(`deleted ${response.name}`)
-          setPersons(persons.filter(person => person.id!==removedPerson.id))
-        })
-  }
-
   const addContact = (event) => {
     event.preventDefault()
     const personObject = {
@@ -53,11 +44,23 @@ const App = () => {
       number: newNumber,
     }
 
-   if(persons.some(person => JSON.stringify(person.number) === JSON.stringify(personObject.number))){
+    const alreadyExists = persons.find(person => JSON.stringify(person.name) === JSON.stringify(personObject.name));
+    if(alreadyExists){ {/* update contact */}
+      if(window.confirm(`${newName} already exists in phonebook, replace the old number with a new one?`))
+        personService
+        .update(alreadyExists.id,personObject)
+        .then(updatedPerson => {
+          setPersons(persons.map(person => person.id !== alreadyExists.id ? person : updatedPerson))
+          setNewName('')
+          setNewNumber('')
+        })
+    }
+    else if(persons.some(person => JSON.stringify(person.number) === JSON.stringify(personObject.number))){
       alert(`The number ${newNumber} already exists in phonebook`)
-   }else{
-    personService
-      .create(personObject)
+    }
+    else{
+      personService
+        .create(personObject)
         .then(returnedPerson=>{
           setPersons(persons.concat(returnedPerson))
           console.log(`added ${returnedPerson.name} contact ${returnedPerson.number}`)
@@ -65,6 +68,16 @@ const App = () => {
           setNewNumber('')
         })
    } 
+  }
+
+  const DeleteContact = (id,name) => {
+    if (window.confirm(`Delete ${name} ?`))
+      personService
+        .remove(id)
+        .then(removedPerson => {
+          console.log(`deleted ${removedPerson.name}`)
+          setPersons(persons.filter(person => person.id!==removedPerson.id))
+        })
   }
 
   const filteredPersons = persons.filter(person => person.name.toLowerCase().includes(searchName))
