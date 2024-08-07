@@ -2,7 +2,6 @@ const PersonForm=({newName,newNumber,handleName,handleNumber,addContact})=>{
     return(
       <>
       <form onSubmit={addContact}>
-        <div>debug: {newName}</div>
         <div>
           name: <input value={newName} onChange={handleName} />
         </div>

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
 import personService from './services/persons'
 
 import Numbers from './components/Numbers'
 import PersonForm from './components/PersonForm'
 import Filter from './components/Filter'
+import Notification from './components/Notification'
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -13,6 +13,8 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [searchName, setSearchName] = useState('')
   const [showAll, setShowAll] = useState(true)
+  const [notification, setNotification]=useState(null)
+  const [error,setError]=useState(null)
 
   useEffect(() => {
     document.title="Phonebook"
@@ -51,19 +53,31 @@ const App = () => {
         .update(alreadyExists.id,personObject)
         .then(updatedPerson => {
           setPersons(persons.map(person => person.id !== alreadyExists.id ? person : updatedPerson))
+          setNotification(`New contact ${updatedPerson.number} added for ${updatedPerson.name}`)
+          setTimeout(()=>setNotification(null),5000)
           setNewName('')
           setNewNumber('')
+        }).catch(error=>{
+          setError(`Information of ${alreadyExists.name} has aleady been removed from the server`)
+          setTimeout(()=>setError(null),5000)
+          personService.getAll().then(updatedPersons => {
+            setPersons(updatedPersons)
+          })
         })
     }
+
     else if(persons.some(person => JSON.stringify(person.number) === JSON.stringify(personObject.number))){
-      alert(`The number ${newNumber} already exists in phonebook`)
+      setError(`The number ${newNumber} already exists in phonebook`)
+      setTimeout(()=>setError(null),5000)
     }
+
     else{
       personService
         .create(personObject)
         .then(returnedPerson=>{
           setPersons(persons.concat(returnedPerson))
-          console.log(`added ${returnedPerson.name} contact ${returnedPerson.number}`)
+          setNotification(`Added ${returnedPerson.name}`)
+          setTimeout(()=>setNotification(null),5000)
           setNewName('')
           setNewNumber('')
         })
@@ -88,6 +102,7 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
+      <Notification error={error} notification={notification}/>
         <Filter searchName={searchName} handleSearch={handleSearch} showAll={showAll} setShowAll={setShowAll} />
       <h2>Add New</h2>
         <PersonForm newName={newName} newNumber={newNumber} handleName={handleName} handleNumber={handleNumber} addContact={addContact} />
