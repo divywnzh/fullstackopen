@@ -8,6 +8,7 @@ const App =()=> {
   const [countryList, setCountryList]=useState([])
   const [countryDetails, setCountryDetails]=useState(null)
   const [isCountrySelected, setIsCountrySelected]=useState(false) //to prevent ineffecient re triggering of use effect
+  const [weather, setWeather] = useState(null) // New state for weather
 
   document.title="Data For Countries"
   
@@ -39,6 +40,23 @@ const App =()=> {
     .then(response=>{
       setCountryDetails(response.data)
       setIsCountrySelected(true)
+
+      const capital=response.data.capital
+      const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY
+
+      axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${capital}&appid=${apiKey}&units=metric`)
+          .then(weatherResponse => {
+            setWeather(weatherResponse.data)
+          })
+          .catch(error => {
+            console.error('Error fetching weather data:', error)
+            setWeather({
+              main: { temp: 'N/A' },
+              weather: [{ icon: '01d', description: 'No data' }],
+              wind: { speed: 'N/A' }
+            })
+          })
+
     })
     .catch(error => {
       console.error('Error fetching country details:', error)
@@ -50,8 +68,8 @@ const App =()=> {
     <form>
       <div>find countries <input value={countrySearch} onChange={handleSearch}/> </div>
     </form>
-    <div>{countryDetails ? 
-    (<Details countryDetails={countryDetails}/>)
+    <div>{countryDetails && weather? 
+    (<Details countryDetails={countryDetails} weather={weather} />)
       :(FilteredCountries.length>10 ? 
         (<div className='TooBig'>Too many matches, specify another filter</div>)
           :(FilteredCountries.map((country,index)=><div key={index}>{country}<button onClick={()=>handleCountryDetails(country)}>show</button></div>)))}
