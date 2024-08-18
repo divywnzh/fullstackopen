@@ -1,11 +1,13 @@
 import { useState,useEffect } from 'react'
 import axios from 'axios'
+import Details from './components/Details'
 
 
-function App() {
+const App =()=> {
   const [countrySearch, setCountrySearch] = useState('')
   const [countryList, setCountryList]=useState([])
   const [countryDetails, setCountryDetails]=useState(null)
+  const [isCountrySelected, setIsCountrySelected]=useState(false) //to prevent ineffecient re triggering of use effect
 
   document.title="Data For Countries"
   
@@ -19,41 +21,41 @@ function App() {
 
   const handleSearch=(event)=>{
     setCountrySearch(event.target.value)
+    setCountryDetails(null)
+    setIsCountrySelected(false)
   }
 
   const FilteredCountries=countryList.filter(country=>country.toLowerCase().includes(countrySearch.toLowerCase()))
+  
   useEffect(() => {
-    if (FilteredCountries.length === 1) {
-      axios
-        .get(`https://studies.cs.helsinki.fi/restcountries/api/name/${FilteredCountries[0]}`)
-        .then(response => {
-          setCountryDetails(response.data); // Assuming the response is an array
-        })
-        .catch(error => {
-          console.error('Error fetching country details:', error);
-        });
+    if (FilteredCountries.length === 1 && !isCountrySelected) {
+      handleCountryDetails(FilteredCountries[0])
     }
-  }, [FilteredCountries])
+  }, [FilteredCountries, isCountrySelected])
+
+  const handleCountryDetails=(countryName)=>{
+    axios
+    .get(`https://studies.cs.helsinki.fi/restcountries/api/name/${countryName}`)
+    .then(response=>{
+      setCountryDetails(response.data)
+      setIsCountrySelected(true)
+    })
+    .catch(error => {
+      console.error('Error fetching country details:', error)
+    })
+  }
 
   return (
     <>
     <form>
       <div>find countries <input value={countrySearch} onChange={handleSearch}/> </div>
     </form>
-    <div>{FilteredCountries.length>10 ? (<div className='TooBig'>Too many matches, specify another filter</div>):
-      (FilteredCountries.length===1)?
-        (countryDetails ? (
-        <>
-          <h1>{countryDetails.name.common}</h1>
-          <div>capital {countryDetails.capital}</div>
-          <div>area {countryDetails.area}</div>
-          <h3>languages:</h3>
-          <div>{Object.values(countryDetails.languages).map((language,index)=><li key={index}>{language}</li>)}</div>
-          <div className="flag">{countryDetails.flag}</div>
-        </>):(<div>Loading...</div>)
-      ):
-      (FilteredCountries.map((country,index)=><div key={index}>{country}</div>)
-    )}</div>
+    <div>{countryDetails ? 
+    (<Details countryDetails={countryDetails}/>)
+      :(FilteredCountries.length>10 ? 
+        (<div className='TooBig'>Too many matches, specify another filter</div>)
+          :(FilteredCountries.map((country,index)=><div key={index}>{country}<button onClick={()=>handleCountryDetails(country)}>show</button></div>)))}
+    </div>
     </>
   )
 }
