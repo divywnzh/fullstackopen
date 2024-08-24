@@ -1,6 +1,8 @@
 import { useState,useEffect } from 'react'
 import axios from 'axios'
 import Details from './components/Details'
+import SearchBar from './components/SearchBar'
+import CountryList from './components/CountryList'
 
 
 const App =()=> {
@@ -65,14 +67,10 @@ const App =()=> {
 
   return (
     <>
-    <form>
-      <div>find countries <input value={countrySearch} onChange={handleSearch}/> </div>
-    </form>
-    <div>{countryDetails && weather? 
-    (<Details countryDetails={countryDetails} weather={weather} />)
-      :(FilteredCountries.length>10 ? 
-        (<div className='TooBig'>Too many matches, specify another filter</div>)
-          :(FilteredCountries.map((country,index)=><div key={index}>{country}<button onClick={()=>handleCountryDetails(country)}>show</button></div>)))}
+    <SearchBar countrySearch={countrySearch} handleSearch={handleSearch}/>
+    <div>{countryDetails && weather ? (
+      <Details countryDetails={countryDetails} weather={weather} />
+    ):(<CountryList FilteredCountries={FilteredCountries} handleCountryDetails={handleCountryDetails}/>)}
     </div>
     </>
   )
