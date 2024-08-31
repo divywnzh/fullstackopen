@@ -30,7 +30,8 @@ const App = () => {
   console.log('render', persons.length, 'persons')
 
   const handleSearch=(event)=>{
-    setSearchName(event.target.value.toLowerCase())
+    const newSearch=event.target.value.toLowerCase()
+    setSearchName(newSearch)
   }
   const handleName = (event) => {
     setNewName(event.target.value)
@@ -89,8 +90,9 @@ const App = () => {
       personService
         .remove(id)
         .then(removedPerson => {
+          const updatedPersons = persons.filter(person => person.id !== id)
           console.log(`deleted ${removedPerson.name}`)
-          setPersons(persons.filter(person => person.id!==removedPerson.id))
+          setPersons(updatedPersons)
         })
   }
 
